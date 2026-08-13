@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Recruitment List Builder</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue: #4a6fa5;
+  --white-bg: #f0f4ff;
+  --qb: #2d6a4f;
+  --accent: #5b6af0;
+  --surface: #fff;
+  --bg: #f0f2f5;
+  --border: #e0e0e0;
+  --text: #1a1a2e;
+  --muted: #888;
+  --danger: #e74c3c;
+  --danger-bg: #fee2e2;
+}
+
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── Header ── */
+header { background: #1a1a2e; color: #fff; padding: 14px 24px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+header h1 { font-size: 1.1rem; font-weight: 700; white-space: nowrap; }
+.tabs { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+.tab-btn { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border: none; border-radius: 6px; padding: 6px 13px; font-size: 0.82rem; cursor: pointer; transition: background 0.15s, color 0.15s; white-space: nowrap; }
+.tab-btn.active, .tab-btn:hover { background: rgba(255,255,255,0.25); color: #fff; }
+
+/* ── Layout ── */
+.page { display: none; padding: 24px 28px; max-width: 1200px; margin: 0 auto; }
+.page.active { display: block; }
+
+.two-col { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+.card { background: var(--surface); border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.card h2 { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 16px; }
+
+/* ── Form elements ── */
+label { display: block; font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 4px; margin-top: 10px; }
+label:first-of-type { margin-top: 0; }
+input[type="text"], select { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; font-size: 0.88rem; outline: none; transition: border-color 0.15s; background: #fff; }
+input:focus, select:focus { border-color: var(--accent); }
+
+button { cursor: pointer; border: none; border-radius: 7px; font-size: 0.85rem; font-weight: 600; padding: 9px 14px; transition: opacity 0.15s; }
+button:hover { opacity: 0.82; }
+.btn-primary { background: var(--accent); color: #fff; width: 100%; margin-top: 12px; }
+.btn-sm { padding: 4px 10px; font-size: 0.76rem; }
+.btn-danger { background: var(--danger-bg); color: var(--danger); }
+.btn-ghost { background: #f0f2f5; color: #444; }
+.btn-green { background: #d1fae5; color: #065f46; }
+.btn-blue { background: #dbeafe; color: #1e40af; }
+
+/* ── People list ── */
+.person-list { display: flex; flex-direction: column; gap: 6px; max-height: 420px; overflow-y: auto; }
+.person-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: #f7f8ff; border-radius: 7px; font-size: 0.84rem; }
+.person-row span.name { flex: 1; font-weight: 500; }
+.rank-pill { font-size: 0.73rem; font-weight: 700; padding: 2px 9px; border-radius: 20px; white-space: nowrap; }
+
+/* rank colors */
+.rank-experienced { background: #fef3c7; color: #92400e; }
+.rank-great       { background: #d1fae5; color: #065f46; }
+.rank-good        { background: #dbeafe; color: #1e40af; }
+.rank-decent      { background: #ede9fe; color: #5b21b6; }
+.rank-needs       { background: #fee2e2; color: #991b1b; }
+.rank-qb          { background: #1a1a2e;  color: #fff; }
+
+/* ── Rules page ── */
+.rules-section { margin-bottom: 20px; }
+.rules-section-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px solid var(--border); }
+.rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.role-box { border-radius: 10px; padding: 14px; border: 2px solid var(--border); }
+.role-box h3 { font-size: 0.83rem; font-weight: 700; margin-bottom: 10px; }
+.role-box.blue-role  { border-color: #93c5fd; background: #eff6ff; }
+.role-box.white-role { border-color: #d1d5db; background: #f9fafb; }
+.role-box.qb-role    { border-color: #6ee7b7; background: #f0fdf4; }
+.role-box.pnm-role   { border-color: #c4b5fd; background: #faf5ff; }
+.role-box.soft-role  { border-color: #fca5a5; background: #fff1f2; }
+.role-box.hard-role  { border-color: #fdba74; background: #fff7ed; }
+.role-box label { margin-top: 0; }
+
+.checkbox-group { display: flex; flex-direction: column; gap: 6px; }
+.checkbox-group label { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 500; cursor: pointer; margin-top: 0; }
+.checkbox-group input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; }
+
+/* ── List table ── */
+.list-toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.list-toolbar strong { font-size: 0.85rem; color: var(--muted); margin-right: 4px; }
+
+.phil-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.phil-table th { background: #1a1a2e; color: #fff; padding: 8px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.phil-table th.blue-h  { background: #2563eb; }
+.phil-table th.white-h { background: #6b7280; }
+.phil-table th.qb-h    { background: #065f46; }
+.phil-table th.loc-h   { background: #374151; }
+.phil-table th.soft-h  { background: #be123c; }
+.phil-table th.hard-h  { background: #c2410c; }
+
+.phil-table tr:nth-child(even) td { background: #f7f8ff; }
+.phil-table td { padding: 6px 10px; border-bottom: 1px solid #eee; }
+.phil-table td.pnm-cell   { font-weight: 600; }
+.phil-table td.blue-cell  { color: #1e40af; }
+.phil-table td.white-cell { color: #374151; }
+.phil-table td.soft-cell  { color: #9f1239; }
+.phil-table td.hard-cell  { color: #9a3412; }
+.phil-table td.qb-cell    { color: #065f46; font-weight: 600; }
+.phil-table td.loc-cell   { font-size: 0.78rem; color: var(--muted); }
+
+.divider-row td { background: #1a1a2e !important; height: 6px; padding: 0; }
+
+.editable { cursor: pointer; border-bottom: 1px dashed #ccc; }
+.editable:hover { background: #fffbeb; }
+.member-chip { display:inline-block; background:#f0f2f5; border-radius:20px; padding:3px 10px; font-size:0.8rem; }
+
+/* ── Locations ── */
+.loc-list { display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
+.loc-row { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #f7f8ff; border-radius: 7px; font-size: 0.84rem; }
+.loc-row span { flex: 1; }
+
+/* ── Empty / utility ── */
+.empty { text-align: center; color: var(--muted); font-size: 0.84rem; padding: 24px 0; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.error { color: var(--danger); font-size: 0.78rem; margin-top: 5px; min-height: 16px; }
+.success { color: #065f46; font-size: 0.78rem; margin-top: 5px; }
+
+@media print {
+  header, .tabs, .list-toolbar, .btn-primary { display: none !important; }
+  .page { display: block !important; padding: 0; }
+  .card { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📋 Recruitment List Builder</h1>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('people',this)">People & Ranks</button>
+    <button class="tab-btn" onclick="showTab('rules',this)">Rules</button>
+    <button class="tab-btn" onclick="showTab('locations',this)">Locations</button>
+    <button class="tab-btn" onclick="showTab('philanthropy',this)">Philanthropy</button>
+    <button class="tab-btn" onclick="showTab('sisterhood',this)">Sisterhood</button>
+    <button class="tab-btn" onclick="showTab('preference',this)">Preference</button>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════
+     TAB 1: PEOPLE & RANKS
+══════════════════════════════════════════ -->
+<div class="page active" id="tab-people">
+  <div class="two-col">
+    <div class="card">
+      <h2>Add Person</h2>
+      <label>Last Name, First Name</label>
+      <input type="text" id="pName" placeholder="e.g. Smith, Jane" />
+      <label>Rank</label>
+      <select id="pRank">
+        <option value="experienced">Experienced Recruiter</option>
+        <option value="great">Great</option>
+        <option value="good" selected>Good</option>
+        <option value="decent">Decent</option>
+        <option value="needs">Needs Improvement</option>
+        <option value="qb">QB</option>
+      </select>
+      <div id="pError" class="error"></div>
+      <button class="btn-primary" onclick="addPerson()">+ Add Person</button>
+      <hr class="divider" />
+      <h2 style="margin-bottom:10px;">Paste a Group</h2>
+      <label>Rank for this group</label>
+      <select id="pasteRank">
+        <option value="experienced">Experienced Recruiter</option>
+        <option value="great">Great</option>
+        <option value="good" selected>Good</option>
+        <option value="decent">Decent</option>
+        <option value="needs">Needs Improvement</option>
+        <option value="qb">QB</option>
+      </select>
+      <label>Names (one per line)</label>
+      <textarea id="pasteNames" style="width:100%;height:110px;border:1px solid var(--border);border-radius:7px;padding:8px;font-size:0.83rem;resize:vertical;outline:none;font-family:inherit;" placeholder="Smith, Jane&#10;Doe, Amy&#10;Lee, Cora"></textarea>
+      <button class="btn-primary" onclick="pasteGroup()">Add All to Group</button>
+      <div id="pasteResult" class="success" style="margin-top:6px;"></div>
+      <hr class="divider" />
+      <button class="btn-danger btn-sm" onclick="clearPeople()">Clear All People</button>
+    </div>
+
+    <div class="card">
+      <h2>All People <span id="peopleCount" style="font-weight:400;color:var(--muted)"></span></h2>
+      <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+        <button class="btn-ghost btn-sm" onclick="filterRank('')">All</button>
+        <button class="btn-sm rank-experienced" onclick="filterRank('experienced')">Experienced</button>
+        <button class="btn-sm rank-great" onclick="filterRank('great')">Great</button>
+        <button class="btn-sm rank-good" onclick="filterRank('good')">Good</button>
+        <button class="btn-sm rank-decent" onclick="filterRank('decent')">Decent</button>
+        <button class="btn-sm rank-needs" onclick="filterRank('needs')">Needs Improvement</button>
+        <button class="btn-sm rank-qb" onclick="filterRank('qb')">QB</button>
+      </div>
+      <div class="person-list" id="personList">
+        <div class="empty">No people added yet.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 2: RULES
+══════════════════════════════════════════ -->
+<div class="page" id="tab-rules">
+  <div style="margin-bottom:16px;">
+    <p style="font-size:0.88rem;color:var(--muted);">Define which ranks fill each role for each round. Save each section separately. Regenerate each list after making changes.</p>
+  </div>
+
+  <!-- Philanthropy Rules -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="rules-section-label">Philanthropy Round</div>
+    <div class="rules-grid" id="philRulesGrid"></div>
+    <button class="btn-primary" style="max-width:200px;margin-top:16px;" onclick="saveRulesSection('phil')">Save Philanthropy Rules</button>
+    <div id="philRulesSaved" class="success"></div>
+  </div>
+
+  <!-- Sisterhood Rules -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="rules-section-label">Sisterhood Round</div>
+    <div class="rules-grid" id="sisRulesGrid"></div>
+    <button class="btn-primary" style="max-width:200px;margin-top:16px;" onclick="saveRulesSection('sis')">Save Sisterhood Rules</button>
+    <div id="sisRulesSaved" class="success"></div>
+  </div>
+
+  <!-- Preference Rules -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="rules-section-label">Preference Round</div>
+    <div class="rules-grid" id="prefRulesGrid"></div>
+    <button class="btn-primary" style="max-width:200px;margin-top:16px;" onclick="saveRulesSection('pref')">Save Preference Rules</button>
+    <div id="prefRulesSaved" class="success"></div>
+  </div>
+
+  <div class="card">
+    <h2>How roles work</h2>
+    <p style="font-size:0.84rem;color:#555;line-height:1.6;">
+      <strong>PNM</strong> — the person being recruited in this round.<br/>
+      <strong>Blue (Rd 1 &amp; 3)</strong> — recruiter in rounds 1 and 3 (Philanthropy &amp; Sisterhood).<br/>
+      <strong>White (Rd 2)</strong> — recruiter in round 2 (Philanthropy &amp; Sisterhood).<br/>
+      <strong>Soft / Hard</strong> — the two recruiter roles in Preference round.<br/>
+      <strong>QB</strong> — the quarterback who guides the conversation group.<br/><br/>
+      A person who appears in both blue columns and the white column is called a <strong style="color:#5b21b6;">Violet</strong> and is highlighted purple. In Preference, someone in both Soft and Hard is also highlighted purple.
+    </p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 3: LOCATIONS
+══════════════════════════════════════════ -->
+<div class="page" id="tab-locations">
+  <div class="two-col">
+    <div class="card">
+      <h2>Add Location</h2>
+      <label>Location Name</label>
+      <input type="text" id="locName" placeholder="e.g. Elephant 1" />
+      <div id="locError" class="error"></div>
+      <button class="btn-primary" onclick="addLocation()">+ Add Location</button>
+      <hr class="divider" />
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:8px;">Quick add a numbered series:</div>
+      <div class="row3" style="gap:6px;">
+        <input type="text" id="seriesName" placeholder="Name" style="font-size:0.8rem;" />
+        <input type="number" id="seriesFrom" placeholder="From" min="1" style="font-size:0.8rem;" />
+        <input type="number" id="seriesTo" placeholder="To" min="1" style="font-size:0.8rem;" />
+      </div>
+      <button class="btn-ghost btn-sm" style="margin-top:8px;width:100%;" onclick="addSeries()">Add Series</button>
+      <hr class="divider"/>
+      <button class="btn-ghost btn-sm" onclick="resetLocations()">↩ Reset to Defaults</button>
+      <button class="btn-danger btn-sm" style="margin-top:6px;" onclick="clearLocations()">Clear All</button>
+    </div>
+
+    <div class="card">
+      <h2>Locations <span id="locCount" style="font-weight:400;color:var(--muted)"></span></h2>
+      <div class="loc-list" id="locList">
+        <div class="empty">No locations added yet.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 4: PHILANTHROPY LIST
+══════════════════════════════════════════ -->
+<div class="page" id="tab-philanthropy">
+  <div class="list-toolbar">
+    <button class="btn-primary" style="width:auto;" onclick="generatePhilList()">🔀 Generate / Regenerate List</button>
+    <button class="btn-green btn-sm" onclick="window.print()">🖨 Print</button>
+    <div style="flex:1;"></div>
+    <span id="philStatus" style="font-size:0.82rem;color:var(--muted);"></span>
+  </div>
+
+  <div id="philLeftoverSection" style="display:none;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px 18px;margin-bottom:14px;">
+    <strong style="font-size:0.85rem;color:#c2410c;">⚠ <span id="philLeftoverCount"></span> PNM(s) not assigned</strong>
+    <span style="font-size:0.8rem;color:#92400e;margin-left:6px;">— recruiter pool too small. Add more eligible recruiters.</span>
+    <div id="philLeftoverList" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;"></div>
+  </div>
+
+  <div class="card" id="philCard">
+    <div class="empty" id="philEmpty">Click "Generate List" above to create the philanthropy list.</div>
+    <table class="phil-table" id="philTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>PNM Name</th>
+          <th class="blue-h">Blue (Rd 1)</th>
+          <th class="white-h">White (Rd 2)</th>
+          <th class="blue-h">Blue (Rd 3)</th>
+          <th class="loc-h">Location</th>
+          <th class="qb-h">QB</th>
+        </tr>
+      </thead>
+      <tbody id="philBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 5: SISTERHOOD LIST
+══════════════════════════════════════════ -->
+<div class="page" id="tab-sisterhood">
+  <div class="list-toolbar">
+    <button class="btn-primary" style="width:auto;" onclick="generateSisList()">🔀 Generate / Regenerate List</button>
+    <button class="btn-green btn-sm" onclick="window.print()">🖨 Print</button>
+    <div style="flex:1;"></div>
+    <span id="sisStatus" style="font-size:0.82rem;color:var(--muted);"></span>
+  </div>
+
+  <div id="sisLeftoverSection" style="display:none;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px 18px;margin-bottom:14px;">
+    <strong style="font-size:0.85rem;color:#c2410c;">⚠ <span id="sisLeftoverCount"></span> PNM(s) not assigned</strong>
+    <span style="font-size:0.8rem;color:#92400e;margin-left:6px;">— recruiter pool too small. Add more eligible recruiters.</span>
+    <div id="sisLeftoverList" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;"></div>
+  </div>
+
+  <div class="card" id="sisCard">
+    <div class="empty" id="sisEmpty">Click "Generate List" above to create the sisterhood list.</div>
+    <table class="phil-table" id="sisTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>PNM Name</th>
+          <th class="blue-h">Blue (Rd 1)</th>
+          <th class="white-h">White (Rd 2)</th>
+          <th class="blue-h">Blue (Rd 3)</th>
+          <th class="loc-h">Location</th>
+          <th class="qb-h">QB</th>
+        </tr>
+      </thead>
+      <tbody id="sisBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 6: PREFERENCE LIST
+══════════════════════════════════════════ -->
+<div class="page" id="tab-preference">
+  <div class="list-toolbar">
+    <button class="btn-primary" style="width:auto;" onclick="generatePrefList()">🔀 Generate / Regenerate List</button>
+    <button class="btn-green btn-sm" onclick="window.print()">🖨 Print</button>
+    <div style="flex:1;"></div>
+    <span id="prefStatus" style="font-size:0.82rem;color:var(--muted);"></span>
+  </div>
+
+  <div id="prefLeftoverSection" style="display:none;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px 18px;margin-bottom:14px;">
+    <strong style="font-size:0.85rem;color:#c2410c;">⚠ <span id="prefLeftoverCount"></span> PNM(s) not assigned</strong>
+    <span style="font-size:0.8rem;color:#92400e;margin-left:6px;">— recruiter pool too small. Add more eligible recruiters.</span>
+    <div id="prefLeftoverList" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;"></div>
+  </div>
+
+  <div class="card" id="prefCard">
+    <div class="empty" id="prefEmpty">Click "Generate List" above to create the preference list.</div>
+    <table class="phil-table" id="prefTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>PNM Name</th>
+          <th class="soft-h">Soft Recruiter</th>
+          <th class="hard-h">Hard Recruiter</th>
+          <th class="loc-h">Location</th>
+          <th class="qb-h">QB</th>
+        </tr>
+      </thead>
+      <tbody id="prefBody"></tbody>
+    </table>
+  </div>
+</div>
+
+
+<script>
+// ── State ────────────────────────────────────────────────────────────────────
+let people = JSON.parse(localStorage.getItem('rlb_people') || '[]');
+
+const DEFAULT_LOCATIONS = [
+  'Elephant 1','Elephant 2','Elephant 3','Elephant 4',
+  'Living Room 1','Living Room 2','Living Room 3','Living Room 4','Living Room 5',
+  'Living Room 6','Living Room 7','Living Room 8','Living Room 9','Living Room 10',
+  'Living Room 11','Living Room 12','Living Room 13','Living Room 14','Living Room 15',
+  'Living Room 16','Living Room 17','Living Room 18','Living Room 19',
+  'Breezeway 1','Breezeway 2','Breezeway 3','Breezeway 4','Breezeway 5','Breezeway 6',
+  'Alphie 1','Alphie 2','Alphie 3','Alphie 4',
+  'Baker 1','Baker 2','Baker 3','Baker 4','Baker 5','Baker 6','Baker 7','Baker 8',
+  'Daphne 1','Daphne 2','Daphne 3','Daphne 4','Daphne 5',
+  'Dining Room 1','Dining Room 2','Dining Room 3','Dining Room 4'
+].map((name, i) => ({ id: i + 1, name }));
+
+const _savedLocs = JSON.parse(localStorage.getItem('rlb_locs') || 'null');
+let locations = (_savedLocs && _savedLocs.length === DEFAULT_LOCATIONS.length)
+  ? _savedLocs : DEFAULT_LOCATIONS.map(l => ({ ...l }));
+
+const DEFAULT_THREE_RULES = {
+  pnm:   ['experienced','great','good','decent','needs'],
+  blue:  ['experienced','great','good','decent'],
+  white: ['experienced','great','good'],
+  qb:    ['qb']
+};
+
+let philRules = JSON.parse(localStorage.getItem('rlb_phil_rules') || localStorage.getItem('rlb_rules') || JSON.stringify(DEFAULT_THREE_RULES));
+let sisRules  = JSON.parse(localStorage.getItem('rlb_sis_rules')  || JSON.stringify(DEFAULT_THREE_RULES));
+let prefRules = JSON.parse(localStorage.getItem('rlb_pref_rules') || JSON.stringify({
+  pnm:  ['experienced','great','good','decent','needs'],
+  soft: ['experienced','great','good','decent'],
+  hard: ['experienced','great','good'],
+  qb:   ['qb']
+}));
+
+let currentFilter = '';
+let philList = [], philLeftoverPnms = [];
+let sisList  = [], sisLeftoverPnms  = [];
+let prefList = [], prefLeftoverPnms = [];
+
+const RANKS = [
+  { key: 'experienced', label: 'Experienced Recruiter', css: 'rank-experienced' },
+  { key: 'great',       label: 'Great',                 css: 'rank-great' },
+  { key: 'good',        label: 'Good',                  css: 'rank-good' },
+  { key: 'decent',      label: 'Decent',                css: 'rank-decent' },
+  { key: 'needs',       label: 'Needs Improvement',     css: 'rank-needs' },
+  { key: 'qb',          label: 'QB',                    css: 'rank-qb' },
+];
+
+function save() {
+  localStorage.setItem('rlb_people',     JSON.stringify(people));
+  localStorage.setItem('rlb_locs',       JSON.stringify(locations));
+  localStorage.setItem('rlb_phil_rules', JSON.stringify(philRules));
+  localStorage.setItem('rlb_sis_rules',  JSON.stringify(sisRules));
+  localStorage.setItem('rlb_pref_rules', JSON.stringify(prefRules));
+}
+
+// ── Tabs ────────────────────────────────────────────────────────────────────
+function showTab(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'rules') renderAllRules();
+}
+
+// ── People ───────────────────────────────────────────────────────────────────
+function addPerson() {
+  const name = document.getElementById('pName').value.trim();
+  const rank = document.getElementById('pRank').value;
+  const err  = document.getElementById('pError');
+  if (!name) { err.textContent = 'Please enter a name.'; return; }
+  err.textContent = '';
+  people.push({ id: Date.now(), name, rank });
+  people.sort((a,b) => a.name.localeCompare(b.name));
+  document.getElementById('pName').value = '';
+  save(); renderPeople();
+}
+
+function removePerson(id) {
+  people = people.filter(p => p.id !== id);
+  save(); renderPeople();
+}
+
+function filterRank(r) { currentFilter = r; renderPeople(); }
+
+function clearPeople() {
+  if (!confirm('Clear all people?')) return;
+  people = []; save(); renderPeople();
+}
+
+function rankLabel(key) { return RANKS.find(r => r.key === key)?.label || key; }
+function rankCss(key)   { return RANKS.find(r => r.key === key)?.css || ''; }
+
+function renderPeople() {
+  const el = document.getElementById('personList');
+  const list = currentFilter ? people.filter(p => p.rank === currentFilter) : people;
+  document.getElementById('peopleCount').textContent = `(${people.length})`;
+  if (!list.length) { el.innerHTML = '<div class="empty">No people match this filter.</div>'; return; }
+  el.innerHTML = list.map(p => `
+    <div class="person-row">
+      <span class="name">${p.name}</span>
+      <span class="rank-pill ${rankCss(p.rank)}">${rankLabel(p.rank)}</span>
+      <select class="btn-sm" style="width:auto;padding:3px 6px;font-size:0.75rem;" onchange="changeRank(${p.id}, this.value)">
+        ${RANKS.map(r => `<option value="${r.key}" ${r.key===p.rank?'selected':''}>${r.label}</option>`).join('')}
+      </select>
+      <button class="btn-danger btn-sm" onclick="removePerson(${p.id})">✕</button>
+    </div>
+  `).join('');
+}
+
+function changeRank(id, newRank) {
+  const p = people.find(p => p.id === id);
+  if (p) { p.rank = newRank; save(); renderPeople(); }
+}
+
+function pasteGroup() {
+  const rank  = document.getElementById('pasteRank').value;
+  const raw   = document.getElementById('pasteNames').value;
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l);
+  let added = 0;
+  for (const name of lines) {
+    people.push({ id: Date.now() + Math.random(), name, rank });
+    added++;
+  }
+  people.sort((a,b) => a.name.localeCompare(b.name));
+  document.getElementById('pasteNames').value = '';
+  const res = document.getElementById('pasteResult');
+  res.textContent = added ? `✓ Added ${added} people as ${rankLabel(rank)}.` : 'Nothing to add.';
+  setTimeout(() => res.textContent = '', 3000);
+  save(); renderPeople();
+}
+
+// ── Rules ────────────────────────────────────────────────────────────────────
+function buildRulesGrid(gridId, ruleSet, roles) {
+  document.getElementById(gridId).innerHTML = roles.map(role => `
+    <div class="role-box ${role.cls}">
+      <h3>${role.label}</h3>
+      <div class="checkbox-group">
+        ${RANKS.map(r => `
+          <label>
+            <input type="checkbox" data-grid="${gridId}" data-role="${role.key}" data-rank="${r.key}"
+              ${ruleSet[role.key]?.includes(r.key) ? 'checked' : ''}
+              onchange="updateRuleInGrid(this)">
+            ${r.label}
+          </label>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderAllRules() {
+  buildRulesGrid('philRulesGrid', philRules, [
+    { key: 'pnm',   label: 'PNM',            cls: 'pnm-role'  },
+    { key: 'blue',  label: 'Blue (Rd 1 & 3)', cls: 'blue-role' },
+    { key: 'white', label: 'White (Rd 2)',    cls: 'white-role'},
+    { key: 'qb',    label: 'QB',              cls: 'qb-role'   },
+  ]);
+  buildRulesGrid('sisRulesGrid', sisRules, [
+    { key: 'pnm',   label: 'PNM',            cls: 'pnm-role'  },
+    { key: 'blue',  label: 'Blue (Rd 1 & 3)', cls: 'blue-role' },
+    { key: 'white', label: 'White (Rd 2)',    cls: 'white-role'},
+    { key: 'qb',    label: 'QB',              cls: 'qb-role'   },
+  ]);
+  buildRulesGrid('prefRulesGrid', prefRules, [
+    { key: 'pnm',  label: 'PNM',            cls: 'pnm-role'  },
+    { key: 'soft', label: 'Soft Recruiter', cls: 'soft-role' },
+    { key: 'hard', label: 'Hard Recruiter', cls: 'hard-role' },
+    { key: 'qb',   label: 'QB',             cls: 'qb-role'   },
+  ]);
+}
+
+function updateRuleInGrid(cb) {
+  const gridId = cb.dataset.grid;
+  const role   = cb.dataset.role;
+  const rank   = cb.dataset.rank;
+  const ruleSet = gridId === 'philRulesGrid' ? philRules
+                : gridId === 'sisRulesGrid'  ? sisRules
+                : prefRules;
+  if (!ruleSet[role]) ruleSet[role] = [];
+  if (cb.checked) { if (!ruleSet[role].includes(rank)) ruleSet[role].push(rank); }
+  else { ruleSet[role] = ruleSet[role].filter(r => r !== rank); }
+}
+
+function saveRulesSection(round) {
+  save();
+  const el = document.getElementById(round + 'RulesSaved');
+  el.textContent = '✓ Rules saved!';
+  setTimeout(() => el.textContent = '', 2000);
+}
+
+// ── Locations ────────────────────────────────────────────────────────────────
+function addLocation() {
+  const name = document.getElementById('locName').value.trim();
+  const err  = document.getElementById('locError');
+  if (!name) { err.textContent = 'Enter a location name.'; return; }
+  err.textContent = '';
+  locations.push({ id: Date.now(), name });
+  document.getElementById('locName').value = '';
+  save(); renderLocations();
+}
+
+function addSeries() {
+  const name = document.getElementById('seriesName').value.trim();
+  const from = parseInt(document.getElementById('seriesFrom').value);
+  const to   = parseInt(document.getElementById('seriesTo').value);
+  if (!name || isNaN(from) || isNaN(to) || from > to) return;
+  for (let i = from; i <= to; i++) locations.push({ id: Date.now() + i, name: `${name} ${i}` });
+  document.getElementById('seriesName').value = '';
+  document.getElementById('seriesFrom').value = '';
+  document.getElementById('seriesTo').value   = '';
+  save(); renderLocations();
+}
+
+function removeLocation(id) {
+  locations = locations.filter(l => l.id !== id);
+  save(); renderLocations();
+}
+
+function resetLocations() {
+  locations = DEFAULT_LOCATIONS.map(l => ({ ...l }));
+  save(); renderLocations();
+}
+function clearLocations() {
+  if (!confirm('Clear all locations?')) return;
+  locations = []; save(); renderLocations();
+}
+
+function renderLocations() {
+  const el = document.getElementById('locList');
+  document.getElementById('locCount').textContent = `(${locations.length})`;
+  if (!locations.length) { el.innerHTML = '<div class="empty">No locations yet.</div>'; return; }
+  el.innerHTML = locations.map(l => `
+    <div class="loc-row">
+      <span>${l.name}</span>
+      <button class="btn-danger btn-sm" onclick="removeLocation(${l.id})">✕</button>
+    </div>
+  `).join('');
+}
+
+// ── Shared generate helpers ───────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function dedup(arr) {
+  const seen = new Set();
+  return arr.filter(p => seen.has(p.id) ? false : (seen.add(p.id), true));
+}
+
+function pick(pool, usedIds, excludeIds) {
+  for (const person of pool) {
+    if (!usedIds.has(person.id) && !excludeIds.has(person.id)) {
+      usedIds.add(person.id);
+      return person;
+    }
+  }
+  return null;
+}
+
+// Generic 3-column generate (blue1 / white / blue2) — returns { list }
+function generateThreeColResult(ruleSet) {
+  let pnmPool = shuffle(people.filter(p => ruleSet.pnm?.includes(p.rank)));
+  const qbPool = shuffle(people.filter(p => ruleSet.qb?.includes(p.rank)));
+  if (!pnmPool.length) { alert('No people eligible for PNM role. Check your Rules tab.'); return null; }
+
+  const pnmIds0    = new Set(pnmPool.map(p => p.id));
+  const blueRules  = new Set(people.filter(p => ruleSet.blue?.includes(p.rank)).map(p => p.id));
+  const whiteRules = new Set(people.filter(p => ruleSet.white?.includes(p.rank)).map(p => p.id));
+
+  let blueNonPNM  = people.filter(p => blueRules.has(p.id)  && !pnmIds0.has(p.id));
+  let whiteNonPNM = people.filter(p => whiteRules.has(p.id) && !pnmIds0.has(p.id));
+
+  const R = pnmPool.length;
+  const C = Math.max(
+    Math.max(0, Math.ceil((R - blueNonPNM.length)  / 2)),
+    Math.max(0, Math.ceil((R - whiteNonPNM.length) / 2))
+  );
+
+  pnmPool.sort((a, b) => {
+    const score = p => (blueRules.has(p.id) ? 2 : 0) + (whiteRules.has(p.id) ? 2 : 0);
+    return score(b) - score(a);
+  });
+  const converted = pnmPool.splice(0, C);
+  pnmPool = shuffle(pnmPool);
+
+  const bluePool0 = [...blueNonPNM, ...converted];
+  const wPool0    = [...whiteNonPNM, ...converted];
+  const blueIdSet  = new Set(bluePool0.map(p => p.id));
+  const whiteIdSet = new Set(wPool0.map(p => p.id));
+
+  const violets   = bluePool0.filter(p => whiteIdSet.has(p.id));
+  const blueOnly  = bluePool0.filter(p => !whiteIdSet.has(p.id));
+  const whiteOnly = wPool0.filter(p => !blueIdSet.has(p.id));
+
+  const blue1Pool = dedup([...shuffle(violets), ...shuffle(blueOnly)]);
+  const whitePool = dedup([...shuffle(violets), ...shuffle(whiteOnly)]);
+  const blue2Pool = dedup([...shuffle(violets), ...shuffle(blueOnly)]);
+
+  const used1 = new Set(), usedW = new Set(), used2 = new Set();
+  const list = [];
+
+  for (let i = 0; i < pnmPool.length; i++) {
+    const pnm   = pnmPool[i];
+    const blue1 = pick(blue1Pool, used1, new Set([pnm.id]));
+    const white = pick(whitePool, usedW, new Set([pnm.id, blue1?.id].filter(Boolean)));
+    const blue2 = pick(blue2Pool, used2, new Set([pnm.id, blue1?.id, white?.id].filter(Boolean)));
+    list.push({ pnm, blue1, white, blue2, loc: locations[i] || { name: `Spot ${i+1}` }, qb: qbPool[i] || null });
+  }
+  return list;
+}
+
+// Generic 2-column generate (soft / hard) — returns list or null
+function generateTwoColResult(ruleSet, col1Key, col2Key) {
+  let pnmPool = shuffle(people.filter(p => ruleSet.pnm?.includes(p.rank)));
+  const qbPool = shuffle(people.filter(p => ruleSet.qb?.includes(p.rank)));
+  if (!pnmPool.length) { alert('No people eligible for PNM role. Check your Rules tab.'); return null; }
+
+  const pnmIds0    = new Set(pnmPool.map(p => p.id));
+  const col1Rules  = new Set(people.filter(p => ruleSet[col1Key]?.includes(p.rank)).map(p => p.id));
+  const col2Rules  = new Set(people.filter(p => ruleSet[col2Key]?.includes(p.rank)).map(p => p.id));
+
+  let col1NonPNM = people.filter(p => col1Rules.has(p.id) && !pnmIds0.has(p.id));
+  let col2NonPNM = people.filter(p => col2Rules.has(p.id) && !pnmIds0.has(p.id));
+
+  const R = pnmPool.length;
+  const C = Math.max(
+    Math.max(0, Math.ceil((R - col1NonPNM.length) / 2)),
+    Math.max(0, Math.ceil((R - col2NonPNM.length) / 2))
+  );
+
+  pnmPool.sort((a, b) => {
+    const score = p => (col1Rules.has(p.id) ? 2 : 0) + (col2Rules.has(p.id) ? 2 : 0);
+    return score(b) - score(a);
+  });
+  const converted = pnmPool.splice(0, C);
+  pnmPool = shuffle(pnmPool);
+
+  const pool1 = [...col1NonPNM, ...converted];
+  const pool2 = [...col2NonPNM, ...converted];
+  const id1Set = new Set(pool1.map(p => p.id));
+  const id2Set = new Set(pool2.map(p => p.id));
+
+  const violets = pool1.filter(p => id2Set.has(p.id));
+  const only1   = pool1.filter(p => !id2Set.has(p.id));
+  const only2   = pool2.filter(p => !id1Set.has(p.id));
+
+  const finalPool1 = dedup([...shuffle(violets), ...shuffle(only1)]);
+  const finalPool2 = dedup([...shuffle(violets), ...shuffle(only2)]);
+
+  const used1 = new Set(), used2 = new Set();
+  const list = [];
+
+  for (let i = 0; i < pnmPool.length; i++) {
+    const pnm  = pnmPool[i];
+    const rec1 = pick(finalPool1, used1, new Set([pnm.id]));
+    const rec2 = pick(finalPool2, used2, new Set([pnm.id, rec1?.id].filter(Boolean)));
+    list.push({ pnm, rec1, rec2, loc: locations[i] || { name: `Spot ${i+1}` }, qb: qbPool[i] || null });
+  }
+  return list;
+}
+
+// ── Render helpers ────────────────────────────────────────────────────────────
+function cell(person, cls, highlightIds) {
+  if (!person) return `<td class="${cls}">—</td>`;
+  const hl = highlightIds.has(person.id);
+  const style = hl ? ' style="background:#ede9fe;color:#5b21b6;font-weight:600;"' : '';
+  return `<td class="${cls}"${style}>${person.name}</td>`;
+}
+
+function renderThreeColTable(list, ids) {
+  const { tableId, bodyId, emptyId, statusId, leftoverSectionId, leftoverCountId, leftoverListId } = ids;
+  document.getElementById(emptyId).style.display = 'none';
+  document.getElementById(tableId).style.display = 'table';
+
+  const half = Math.ceil(list.length / 2);
+  const blueIds  = new Set(list.flatMap(r => [r.blue1, r.blue2].filter(Boolean).map(p => p.id)));
+  const whiteIds = new Set(list.map(r => r.white).filter(Boolean).map(p => p.id));
+  const violetIds = new Set([...blueIds].filter(id => whiteIds.has(id)));
+
+  document.getElementById(bodyId).innerHTML = list.map((row, i) => {
+    const divider = i === half ? `<tr class="divider-row"><td colspan="6"></td></tr>` : '';
+    return `${divider}<tr>
+      <td class="pnm-cell">${row.pnm?.name || '—'}</td>
+      ${cell(row.blue1, 'blue-cell',  violetIds)}
+      ${cell(row.white, 'white-cell', violetIds)}
+      ${cell(row.blue2, 'blue-cell',  violetIds)}
+      <td class="loc-cell">${row.loc?.name || '—'}</td>
+      <td class="qb-cell">${row.qb?.name || '—'}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById(statusId).textContent = [
+    `${list.length} rows`,
+    violetIds.size ? `${violetIds.size} in both blue & white (purple)` : 'no blue+white overlap',
+  ].join(' · ');
+
+  document.getElementById(leftoverSectionId).style.display = 'none';
+}
+
+// ── Generate & render: PHILANTHROPY ─────────────────────────────────────────
+function generatePhilList() {
+  const result = generateThreeColResult(philRules);
+  if (!result) return;
+  philList = result;
+  philLeftoverPnms = [];
+  renderPhilList();
+}
+
+function renderPhilList() {
+  renderThreeColTable(philList, {
+    tableId: 'philTable', bodyId: 'philBody', emptyId: 'philEmpty',
+    statusId: 'philStatus', leftoverSectionId: 'philLeftoverSection',
+    leftoverCountId: 'philLeftoverCount', leftoverListId: 'philLeftoverList',
+  });
+}
+
+// ── Generate & render: SISTERHOOD ─────────────────────────────────────────
+function generateSisList() {
+  const result = generateThreeColResult(sisRules);
+  if (!result) return;
+  sisList = result;
+  sisLeftoverPnms = [];
+  renderSisList();
+}
+
+function renderSisList() {
+  renderThreeColTable(sisList, {
+    tableId: 'sisTable', bodyId: 'sisBody', emptyId: 'sisEmpty',
+    statusId: 'sisStatus', leftoverSectionId: 'sisLeftoverSection',
+    leftoverCountId: 'sisLeftoverCount', leftoverListId: 'sisLeftoverList',
+  });
+}
+
+// ── Generate & render: PREFERENCE ─────────────────────────────────────────
+function generatePrefList() {
+  const result = generateTwoColResult(prefRules, 'soft', 'hard');
+  if (!result) return;
+  prefList = result;
+  prefLeftoverPnms = [];
+  renderPrefList();
+}
+
+function renderPrefList() {
+  document.getElementById('prefEmpty').style.display = 'none';
+  document.getElementById('prefTable').style.display = 'table';
+
+  const half = Math.ceil(prefList.length / 2);
+  const softIds = new Set(prefList.map(r => r.rec1).filter(Boolean).map(p => p.id));
+  const hardIds = new Set(prefList.map(r => r.rec2).filter(Boolean).map(p => p.id));
+  const violetIds = new Set([...softIds].filter(id => hardIds.has(id)));
+
+  document.getElementById('prefBody').innerHTML = prefList.map((row, i) => {
+    const divider = i === half ? `<tr class="divider-row"><td colspan="5"></td></tr>` : '';
+    return `${divider}<tr>
+      <td class="pnm-cell">${row.pnm?.name || '—'}</td>
+      ${cell(row.rec1, 'soft-cell', violetIds)}
+      ${cell(row.rec2, 'hard-cell', violetIds)}
+      <td class="loc-cell">${row.loc?.name || '—'}</td>
+      <td class="qb-cell">${row.qb?.name || '—'}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('prefStatus').textContent = [
+    `${prefList.length} rows`,
+    violetIds.size ? `${violetIds.size} in both soft & hard (purple)` : 'no soft+hard overlap',
+  ].join(' · ');
+
+  document.getElementById('prefLeftoverSection').style.display = 'none';
+}
+
+// ── Init ────────────────────────────────────────────────────────────────────
+renderPeople();
+renderLocations();
+</script>
+</body>
+</html>
